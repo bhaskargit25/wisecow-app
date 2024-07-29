@@ -1,0 +1,50 @@
+import re
+from collections import defaultdict
+
+# Example log line:
+# 127.0.0.1 - - [27/Jul/2021:10:27:32 +0000] "GET /index.html HTTP/1.1" 200 612
+
+logfile = 'web_server.log'
+
+def analyze_logs(logfile):
+    with open(logfile, 'r') as f:
+        logs = f.readlines()
+
+    # Regular expressions to extract relevant data
+    ip_pattern = re.compile(r'(\d+\.\d+\.\d+\.\d+)')
+    request_pattern = re.compile(r'\"(GET|POST) (.+?) HTTP')
+    status_pattern = re.compile(r'\" (\d{3}) ')
+
+    ip_count = defaultdict(int)
+    page_count = defaultdict(int)
+    error_404_count = 0
+
+    for log in logs:
+        ip_match = ip_pattern.search(log)
+        request_match = request_pattern.search(log)
+        status_match = status_pattern.search(log)
+
+        if ip_match:
+            ip = ip_match.group(1)
+            ip_count[ip] += 1
+        
+        if request_match:
+            page = request_match.group(2)
+            page_count[page] += 1
+        
+        if status_match and status_match.group(1) == '404':
+            error_404_count += 1
+
+    # Summarized report
+    print("Top IP addresses:")
+    for ip, count in sorted(ip_count.items(), key=lambda item: item[1], reverse=True)[:10]:
+        print(f'{ip}: {count} requests')
+
+    print("\nTop requested pages:")
+    for page, count in sorted(page_count.items(), key=lambda item: item[1], reverse=True)[:10]:
+        print(f'{page}: {count} requests')
+
+    print(f"\nTotal number of 404 errors: {error_404_count}")
+
+if __name__ == "__main__":
+    analyze_logs(logfile)
