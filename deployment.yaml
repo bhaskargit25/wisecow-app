@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: wisecow
-        image: your-docker-repo/wisecow:latest
+        image: wisecowdocker/wisecow:latest
         ports:
         - containerPort: 4499
